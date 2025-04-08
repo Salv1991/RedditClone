@@ -19,10 +19,12 @@ Route::get('/popular', [PostController::class, 'popular'])->name('post.popular')
 
 Route::get('/user-posts', [PostController::class, 'userPosts'])->name('post.user-posts');
 
-Route::get('/post/{id}', [PostController::class, 'show'])->name('post.show');
+Route::get('/post/{post}', [PostController::class, 'show'])->name('post.show');
 
-Route::post('/post/{id}/upvote', [PostController::class, 'upvote'])->name('post.upvote');
-Route::post('/post/{id}/downvote', [PostController::class, 'downvote'])->name('post.downvote');
+Route::post('/post/{post}/upvote', [PostController::class, 'upvotePost'])->middleware('auth')->name('post.upvote');
+Route::post('/post/{post}/downvote', [PostController::class, 'downvotePost'])->middleware('auth')->name('post.downvote');
+Route::post('/comment/{comment}/upvote', [PostController::class, 'upvoteComment'])->middleware('auth')->name('post.comment.upvote');
+Route::post('/comment/{comment}/downvote', [PostController::class, 'downvoteComment'])->middleware('auth')->name('post.comment.downvote');
 
 Route::middleware('auth')->group(function() {
 

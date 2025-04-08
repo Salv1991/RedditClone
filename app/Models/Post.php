@@ -34,8 +34,20 @@ class Post extends Model
             ->withTimeStamps();
     }
 
+    public function voters() {
+        return $this->belongsToMany(User::class, 'like_posts');
+    }
+
     public function likesCount() {
-        return $this->likedByUsers()->count();
+        return $this->voters()->wherePivot('type', '=', 'like')->count();
+    }
+
+    public function dislikesCount() {
+        return $this->voters()->wherePivot('type', '=', 'dislike')->count();
+    }
+
+    public function votesCount() {
+        return $this->likesCount() - $this->dislikesCount();
     }
 
     public function comments() {

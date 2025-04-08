@@ -31,27 +31,27 @@ import ThreeHorizontalDotsIcon from '../../Shared/Icons/ThreeHorizontalDotsIcon.
                 <div class="mt-4 flex justify-start items-center gap-2">
                     <div :class="[' w-fit gap-2 flex justify-center items-center rounded-full',
                             {
-                                'bg-red-500' : post.voteByUser === 'dislike',
-                                'bg-green-700' : post.voteByUser === 'like',
-                                'bg-neutral-800' : post.voteByUser == null,
+                                'bg-red-500' : post.userVote === 'dislike',
+                                'bg-green-700' : post.userVote === 'like',
+                                'bg-neutral-800' : post.userVote == null,
                             }
                         ]">
                         <Link preserve-scroll method="post" as="button" :href="`/post/${post.id}/upvote`" class="">
                             <VoteUpIcon :class="['rounded-full bg-transparent  hover:bg-neutral-700/40 cursor-pointer ',
                                 {
-                                    'hover:text-white': post.voteByUser === 'dislike' || post.voteByUser === 'like',
-                                    'hover:text-green-700': post.voteByUser === null,
+                                    'hover:text-white': post.userVote === 'dislike' || post.userVote === 'like',
+                                    'hover:text-green-700': post.userVote === null,
                                 }
                             ]"/>
                         </Link>
 
-                        <span class="block min-w-2.5">{{ post.likesCount }}</span>
+                        <span class="block min-w-2.5">{{ post.votesCount }}</span>
 
                         <Link preserve-scroll method="post" as="button" :href="`/post/${post.id}/downvote`" class="">
                             <VoteDownIcon :class="['rounded-full bg-transparent  hover:bg-neutral-700/40 cursor-pointer ',
                                 {
-                                    'hover:text-white': post.voteByUser === 'dislike' || post.voteByUser === 'like',
-                                    'hover:text-red-500': post.voteByUser === null,
+                                    'hover:text-white': post.userVote === 'dislike' || post.userVote === 'like',
+                                    'hover:text-red-500': post.userVote === null,
                                 }
                             ]"/>
                         </Link>

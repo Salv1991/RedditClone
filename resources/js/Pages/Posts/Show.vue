@@ -7,10 +7,11 @@ import Comment from '../../Shared/Components/Comment.vue';
 
     const props = defineProps({
         post: Object,
+        comments: Array,
         title: String,
     });
 
-    console.log('COMMENT:', props.post.comments)
+    console.log('COMMENT:', props.comments)
 
     const scrollToComments = () => {
         const commentsSection = document.getElementById('comments');
@@ -42,27 +43,27 @@ import Comment from '../../Shared/Components/Comment.vue';
         <div class="mt-8 flex justify-start items-center gap-2">
             <div :class="[' w-fit gap-2 flex justify-center items-center rounded-full',
                     {
-                        'bg-red-500' : post.voteByUser === 'dislike',
-                        'bg-green-700' : post.voteByUser === 'like',
-                        'bg-neutral-800' : post.voteByUser == null,
+                        'bg-red-500' : post.userVote === 'dislike',
+                        'bg-green-700' : post.userVote === 'like',
+                        'bg-neutral-800' : post.userVote == null,
                     }
                 ]">
                 <Link preserve-scroll method="post" as="button" :href="`/post/${post.id}/upvote`" class="">
                     <VoteUpIcon :class="['rounded-full bg-transparent  hover:bg-neutral-700/40 cursor-pointer ',
                         {
-                            'hover:text-white': post.voteByUser === 'dislike' || post.voteByUser === 'like',
-                            'hover:text-green-700': post.voteByUser === null,
+                            'hover:text-white': post.userVote === 'dislike' || post.userVote === 'like',
+                            'hover:text-green-700': post.userVote === null,
                         }
                     ]"/>
                 </Link>
 
-                <span class="block min-w-2.5">{{ post.likesCount }}</span>
+                <span class="block min-w-2.5">{{ post.votesCount }}</span>
 
                 <Link preserve-scroll method="post" as="button" :href="`/post/${post.id}/downvote`" class="">
                     <VoteDownIcon :class="['rounded-full bg-transparent  hover:bg-neutral-700/40 cursor-pointer ',
                         {
-                            'hover:text-white': post.voteByUser === 'dislike' || post.voteByUser === 'like',
-                            'hover:text-red-500': post.voteByUser === null,
+                            'hover:text-white': post.userVote === 'dislike' || post.userVote === 'like',
+                            'hover:text-red-500': post.userVote === null,
                         }
                     ]"/>
                 </Link>
@@ -80,7 +81,7 @@ import Comment from '../../Shared/Components/Comment.vue';
         <div id="comments" class="min-h-[600px]">
             <h2 class="mt-8 underline underline-offset-4">Comments</h2>
             <div class="mt-4 space-y-4">
-                <Comment :post="post" />
+                <Comment v-for="comment in comments" :comment="comment" />
             </div>
         </div>
     </article>

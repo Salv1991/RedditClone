@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Post;
+use App\Models\Comment;
 use App\Services\PostService;
 
 class PostController extends Controller
@@ -17,23 +18,26 @@ class PostController extends Controller
         $this->postService = $postService;
     }
 
-    public function show($id) {
-        $post = Post::with('comments.user')->find($id);
+    public function show(Post $post) {
+        $post->load(['comments.user']);
+        $user = Auth::user()->load(['votedPosts','votedComments']);
 
-        if (!$post) {
-            return redirect()->route('home')->with('error', 'Post not found.');
-        }
-
-        $user = Auth::user();
-
-        $vote = $user->votedPosts()
-            ->where('post_id', $post->id)
-            ->first();
-
+        $vote = $user->votedPosts()->firstWhere('post_id', $post->id);
         $voteType = $vote ? $vote->pivot->type : null;
+
+        $comments = $post->comments()->get();
+        $votedCommentsByUser = [];
+        if($user && $comments->isNotEmpty()) {
+            $votedCommentsByUser = $this->postService->getVotedComments($user, $comments, $post);
+        }
 
         return Inertia::render('Posts/Show', [
             'post' => $this->postService->formatPostData($post, $voteType),
+            'comments' => $comments->map(function($comment) use ($votedCommentsByUser) {
+                $vote = $votedCommentsByUser[$comment->id] ?? null;
+
+                return $this->postService->formatCommentData($comment, $vote);
+            }),
         ]);
     }
 
@@ -49,7 +53,7 @@ class PostController extends Controller
         $user = Auth::user();
 
         $posts = Auth::check()
-            ? $user->posts()->loadMissing('post.comments')->get()
+            ? $user->posts()->get()
             : [];
 
         $userLikes = [];
@@ -75,26 +79,26 @@ class PostController extends Controller
         ]);
     }
 
-    public function upvote($id) {
-        $post = Post::find($id);
-
-        if(!$post || !Auth::check()) {
-            return redirect()->route('home')->with('error', 'Post not found.');
-        }
-
-        $this->postService->upvote($post);
+    public function upvotePost(Post $post) {
+        $this->postService->votePost($post, 'like');
 
         return redirect()->back();
     }
 
-    public function downvote($id) {
-        $post = Post::find($id);
+    public function downvotePost(Post $post) {
+        $this->postService->votePost($post, 'dislike');
 
-        if(!$post || !Auth::check()) {
-            return redirect()->route('home')->with('error', 'Post not found.');
-        }
+        return redirect()->back();
+    }
 
-        $this->postService->downvote($post);
+    public function upvoteComment(Comment $comment) {
+        $this->postService->voteComment($comment, 'like');
+
+        return redirect()->back();
+    }
+
+    public function downvoteComment(Comment $comment) {
+        $this->postService->voteComment($comment, 'dislike');
 
         return redirect()->back();
     }

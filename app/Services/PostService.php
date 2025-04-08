@@ -9,15 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class PostService
 {
 
-    public function formatPostData($post, $vote=null) {
-        $comments = $post->comments()->get();
-        $user = Auth::user();
-
-        $votedComments = [];
-
-        if($user && $comments->isNotEmpty()) {
-            $votedComments = $this->getVotedComments($comments, $post);
-        }
+    public function formatPostData($post, $vote = null) {
 
         return [
             'id' => $post->id,
@@ -25,42 +17,34 @@ class PostService
             'title' => $post->title,
             'text' => $post->text,
             'created_at' => $post->created_at,
-            'likesCount' => $post->likesCount(),
-            'commentsData' => $comments->map(function($comment) use ($votedComments) {
-                $vote = $votedComments[$comment->id] ?? null;
-
-                return $this->formatCommentData($comment, $vote);
-            }),
+            'votesCount' => $post->votesCount(),
             'commentsCount' => $post->commentsCount(),
-            'voteByUser' => $vote,
+            'userVote' => $vote,
         ];
     }
 
     public function formatCommentData($comment, $vote) {
+
         return [
             'id' => $comment->id,
             'votesCount' => $comment->votesCount(),
-            'voteByUser' => $vote,
+            'userVote' => $vote,
             'text' => $comment->text,
             'created_at' => $comment->created_at,
             'username' => $comment->user->name,
         ];
     }
 
-    public function getVotedComments($comments, $post) {
-        return Auth::user()->votedComments()
+    public function getVotedComments($user, $comments, $post) {
+        return $user->votedComments()
             ->where('post_id', $post->id)
             ->whereIn('comment_id', $comments->pluck('id'))
             ->get(['comment_id', 'type'])
-            ->keyBy('comment_id')
-            ->map(function($comment){
-                return $comment->type;
-            })
+            ->pluck('type', 'comment_id')
             ->toArray();
     }
 
-
-    public function upvote($post) {
+    public function votePost($post, $type) {
         $user = Auth::user();
 
         $existingVote = $user->votedPosts()
@@ -68,32 +52,31 @@ class PostService
             ->first();
 
         if(!$existingVote) {
-            $user->votedPosts()->attach($post->id, ['type' => 'like']);
-        } else if($existingVote->pivot->type === 'dislike') {
-                $user->votedPosts()->updateExistingPivot($post->id, ['type' => 'like']);
-        } else {
+            $user->votedPosts()->attach($post->id, ['type' => $type]);
+        } else if($existingVote->pivot->type === $type) {
             $user->votedPosts()->detach($post->id);
+        } else {
+            $user->votedPosts()->updateExistingPivot($post->id, ['type' => $type]);
         }
 
         return true;
     }
 
-    public function downvote($post) {
+    public function voteComment($comment, $type) {
         $user = Auth::user();
 
-        $existingVote = $user->votedPosts()
-            ->where('post_id', $post->id)
+        $existingVote = $user->votedComments()
+            ->where('comment_id', $comment->id)
             ->first();
 
+
+
         if(!$existingVote) {
-            $user->votedPosts()->attach($post->id, ['type' => 'dislike']);
-        } else if($existingVote->pivot->type === 'like') {
-                $user->votedPosts()->updateExistingPivot($post->id, ['type' => 'dislike']);
+            $user->votedComments()->attach($comment->id, ['type' => $type]);
+        } else if ($existingVote->pivot->type === $type) {
+            $user->votedComments()->detach($comment->id);
         } else {
-            $user->votedPosts()->detach($post->id);
+            $user->votedComments()->updateExistingPivot($comment->id, ['type' => $type]);
         }
-
-        return true;
     }
-
 }

@@ -23,7 +23,19 @@ class Comment extends Model
             ->withTimeStamps();
     }
 
+    public function voters() {
+        return $this->belongsToMany(User::class, 'comment_likes');
+    }
+
+    public function likesCount() {
+        return $this->voters()->wherePivot('type', '=', 'like')->count();
+    }
+
+    public function dislikesCount() {
+        return $this->voters()->wherePivot('type', '=', 'dislike')->count();
+    }
+
     public function votesCount() {
-        return $this->votedByUsers()->count();
+        return $this->likesCount() - $this->dislikesCount();
     }
 }
