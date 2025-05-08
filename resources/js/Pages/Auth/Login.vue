@@ -10,7 +10,7 @@
 
 <template>
     <div class="fixed inset-20 flex justify-center items-center">
-        <div class="grid grid-cols-2 items-stretch rounded-xl h-full max-h-[600px] w-full max-w-[1000px] m-auto">
+        <div class="grid grid-cols-2 items-stretch rounded-xl overflow-hidden h-full max-h-[600px] w-full max-w-[1000px] m-auto">
             <div class="bg-emerald-400"></div>
             <div class="flex items-center justify-center bg-gray-900/50">
                 <form method="post" class="w-full flex flex-col justify-center items-start p-8" @submit.prevent="form.post('/login')">

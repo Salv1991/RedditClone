@@ -38,20 +38,21 @@ class Post extends Model
         return $this->belongsToMany(User::class, 'like_posts');
     }
 
-    public function likesCount() {
-        return $this->voters()->wherePivot('type', '=', 'like')->count();
+    public function likes() {
+        return $this->voters()->wherePivot('type', '=', 'like');
     }
 
-    public function dislikesCount() {
-        return $this->voters()->wherePivot('type', '=', 'dislike')->count();
+    public function dislikes() {
+        return $this->voters()->wherePivot('type', '=', 'dislike');
     }
 
-    public function votesCount() {
-        return $this->likesCount() - $this->dislikesCount();
-    }
+    // public function votesCount() {
+    //     return $this->likesCount()->count() - $this->dislikesCount();
+    // }
 
     public function comments() {
-        return $this->hasMany(Comment::class, 'post_id');
+        return $this->hasMany(Comment::class, 'post_id')
+            ->withCount(['likes', 'dislikes']);
     }
 
     public function commentsCount() {

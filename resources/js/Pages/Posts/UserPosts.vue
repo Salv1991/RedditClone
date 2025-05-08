@@ -35,7 +35,7 @@ import ThreeHorizontalDotsIcon from '../../Shared/Icons/ThreeHorizontalDotsIcon.
                     </div>
                     <div class="bg-neutral-800 w-fit flex justify-center items-center rounded-full hover:bg-neutral-600 cursor-pointer">
                         <CommentsIcon class="rounded-full"/>
-                        <span class="pr-3">{{post.commentsCount}}</span>
+                        <span class="pr-3">{{post.total_comments}}</span>
                     </div>
                 </div>
             </a>

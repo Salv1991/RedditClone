@@ -1,5 +1,4 @@
 <script setup>
-import LayoutSection from '../Shared/LayoutSection.vue';
 
 </script>
 

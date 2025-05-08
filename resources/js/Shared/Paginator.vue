@@ -13,10 +13,10 @@
                 v-html="link.label"
                 preserve-scroll
                 :class="[
-                    link.active ? 'bg-gray-400/20 text-white' : '',
+                    link.active ? 'bg-gray-400/20 text-emerald-500' : '',
                     link.url
-                        ? 'text-gray-400 py-2 px-3 hover:text-white hover:bg-gray-400/20'
-                        : ' text-gray-700 cursor-default',
+                        ? 'py-2 px-3 hover:bg-gray-400/20'
+                        : 'text-gray-700 cursor-default',
                     'py-2 px-3 duration-200 transition-colors rounded-md',
                 ]"
             />

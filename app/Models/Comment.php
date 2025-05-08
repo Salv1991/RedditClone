@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Carbon\Carbon;
+
 class Comment extends Model
 {
     protected $fillable = [
@@ -13,8 +15,22 @@ class Comment extends Model
         'likes'
     ];
 
+    public function getCreatedAtAttribute($date)
+    {
+        return Carbon::parse($date)->diffForHumans();
+    }
+
+    public function getVotesCountAttribute(): int
+    {
+        return $this->votesCount();
+    }
+
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function post() {
+        return $this->belongsTo(Post::class, 'post_id');
     }
 
     public function votedByUsers() {
@@ -27,15 +43,15 @@ class Comment extends Model
         return $this->belongsToMany(User::class, 'comment_likes');
     }
 
-    public function likesCount() {
-        return $this->voters()->wherePivot('type', '=', 'like')->count();
+    public function likes() {
+        return $this->voters()->wherePivot('type', '=', 'like');
     }
 
-    public function dislikesCount() {
-        return $this->voters()->wherePivot('type', '=', 'dislike')->count();
+    public function dislikes() {
+        return $this->voters()->wherePivot('type', '=', 'dislike');
     }
 
-    public function votesCount() {
-        return $this->likesCount() - $this->dislikesCount();
-    }
+    // public function votesCount() {
+    //     return $this->likesCount()->count() - $this->dislikesCount()->count();
+    // }
 }

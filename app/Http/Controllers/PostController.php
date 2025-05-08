@@ -7,7 +7,9 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Post;
 use App\Models\Comment;
+use App\Models\User;
 use App\Services\PostService;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -18,22 +20,30 @@ class PostController extends Controller
         $this->postService = $postService;
     }
 
-    public function show(Post $post) {
-        $post->load(['comments.user']);
-        $user = Auth::user()->load(['votedPosts','votedComments']);
-
-        $vote = $user->votedPosts()->firstWhere('post_id', $post->id);
-        $voteType = $vote ? $vote->pivot->type : null;
-
-        $comments = $post->comments()->get();
+    public function show(User $user, Post $post) {
         $votedCommentsByUser = [];
-        if($user && $comments->isNotEmpty()) {
-            $votedCommentsByUser = $this->postService->getVotedComments($user, $comments, $post);
+        $authUser = Auth::user();
+
+        $post->loadCount(['likes', 'dislikes']);
+        $comments = $post->comments()->with('user')->withCount(['likes', 'dislikes'])->latest()->get();
+
+        if($authUser) {
+            $vote = DB::table('like_posts')
+                ->where('user_id', $authUser->id)
+                ->where('post_id', $post->id)
+                ->first();
+
+            if($comments->isNotEmpty()) {
+                $votedCommentsByUser = $this->postService->getVotedComments($authUser, $comments, $post);
+            }
         }
 
+        $voteOnPostByUser = $vote ? $vote->type : null;
+
         return Inertia::render('Posts/Show', [
-            'post' => $this->postService->formatPostData($post, $voteType),
-            'comments' => $comments->map(function($comment) use ($votedCommentsByUser) {
+            'post' => $this->postService->formatPostData($post, $voteOnPostByUser),
+            'comments' => $comments->map(function($comment) use ($votedCommentsByUser, $post) {
+                $comment->setRelation('post', $post);
                 $vote = $votedCommentsByUser[$comment->id] ?? null;
 
                 return $this->postService->formatCommentData($comment, $vote);
@@ -54,24 +64,20 @@ class PostController extends Controller
 
         $posts = Auth::check()
             ? $user->posts()->get()
-            : [];
+            : collect();
 
-        $userLikes = [];
+        $postsLikedByUser = [];
 
         if($user && $posts->isNotEmpty()){
-            $userLikes =$user->votedPosts()
-                ->whereIn('post_id', $posts->pluck('id'))
-                ->get(['post_id', 'type'])
-                ->keyBy('post_id')
-                ->map(function($vote) {
-                    return $vote->type;
-                })
+            $postsLikedByUser = DB::table('like_posts')
+                ->where('user_id', $user->id)
+                ->pluck('type', 'post_id')
                 ->toArray();
         }
 
         return Inertia::render('Posts/Index', [
-            'posts' => $posts->map(function($post) use ($userLikes) {
-                $voteType = $userLikes[$post->id] ?? null;
+            'posts' => $posts->map(function($post) use ($postsLikedByUser) {
+                $voteType = $postsLikedByUser[$post->id] ?? null;
 
                 return $this->postService->formatPostData($post, $voteType);
             }),
@@ -102,4 +108,15 @@ class PostController extends Controller
 
         return redirect()->back();
     }
+
+    public function comment(Post $post, Request $request) {
+        $validatedData = $request->validate([
+            'comment' => ['required', 'string'],
+        ]);
+
+        $this->postService->commentOnPost($post, $validatedData);
+
+        return redirect()->back();
+    }
+
 }

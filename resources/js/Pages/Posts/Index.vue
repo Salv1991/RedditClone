@@ -31,34 +31,34 @@ import ThreeHorizontalDotsIcon from '../../Shared/Icons/ThreeHorizontalDotsIcon.
                 <div class="mt-4 flex justify-start items-center gap-2">
                     <div :class="[' w-fit gap-2 flex justify-center items-center rounded-full',
                             {
-                                'bg-red-500' : post.userVote === 'dislike',
-                                'bg-green-700' : post.userVote === 'like',
-                                'bg-neutral-800' : post.userVote == null,
+                                'bg-red-500' : post.user_vote === 'dislike',
+                                'bg-green-700' : post.user_vote === 'like',
+                                'bg-neutral-800' : post.user_vote == null,
                             }
                         ]">
                         <Link preserve-scroll method="post" as="button" :href="`/post/${post.id}/upvote`" class="">
                             <VoteUpIcon :class="['rounded-full bg-transparent  hover:bg-neutral-700/40 cursor-pointer ',
                                 {
-                                    'hover:text-white': post.userVote === 'dislike' || post.userVote === 'like',
-                                    'hover:text-green-700': post.userVote === null,
+                                    'hover:text-white': post.user_vote === 'dislike' || post.user_vote === 'like',
+                                    'hover:text-green-700': post.user_vote === null,
                                 }
                             ]"/>
                         </Link>
 
-                        <span class="block min-w-2.5">{{ post.votesCount }}</span>
+                        <span class="block min-w-2.5">{{ post.total_votes }}</span>
 
                         <Link preserve-scroll method="post" as="button" :href="`/post/${post.id}/downvote`" class="">
                             <VoteDownIcon :class="['rounded-full bg-transparent  hover:bg-neutral-700/40 cursor-pointer ',
                                 {
-                                    'hover:text-white': post.userVote === 'dislike' || post.userVote === 'like',
-                                    'hover:text-red-500': post.userVote === null,
+                                    'hover:text-white': post.user_vote === 'dislike' || post.user_vote === 'like',
+                                    'hover:text-red-500': post.user_vote === null,
                                 }
                             ]"/>
                         </Link>
                     </div>
                     <div class="bg-neutral-800 w-fit flex justify-center items-center rounded-full hover:bg-neutral-600 cursor-pointer">
                         <CommentsIcon class="rounded-full"/>
-                        <span class="pr-3">{{ post.commentsCount }}</span>
+                        <span class="pr-3">{{ post.total_comments }}</span>
                     </div>
                 </div>
             </a>

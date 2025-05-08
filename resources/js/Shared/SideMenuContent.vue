@@ -6,8 +6,8 @@
     import UserIcon from './Icons/UserIcon.vue';
     import UserActiveIcon from './Icons/UserActiveIcon.vue';
     import PopularIcon from './Icons/PopularIcon.vue';
-import UserPostsIcon from './Icons/UserPostsIcon.vue';
-import UserPostsActiveIcon from './Icons/UserPostsActiveIcon.vue';
+    import UserPostsIcon from './Icons/UserPostsIcon.vue';
+    import UserPostsActiveIcon from './Icons/UserPostsActiveIcon.vue';
 </script>
 
 <template>
